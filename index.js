@@ -3,7 +3,7 @@ const inquirer = require('inquirer');
 const { readFile, writeFile } = require('fs/promises')
 
 //the class needed to construct the logo with user info
-const LogoGen = require('./lib/shapes');
+const { LogoGen, Square, Triangle, Circle } = require('./lib/shapes');
 
 //start the question prompts
 inquirer.prompt([
@@ -35,18 +35,38 @@ inquirer.prompt([
         choices: ['red', 'blue', 'green']
     }
 
-    //get the data and plug it into the class
 ]).then((data) => {
-    const logoData = JSON.parse(data);
-    const newLogo = new LogoGen(
-        logoData.text,
-        logoData.text_color,
-        logoData.shape,
-        logoData.shape_color
-);
-    //use render() to create the logo
-    const logo = newLogo.render();
-    return writeFile('./examples/logo.svg', logo);
+    let shape;
+    switch (data.shape) {
+        case 'circle':
+            shape = new Circle(data.shape_color);
+            break;
+        case 'square':
+            shape = new Square(data.shape_color);
+            break;
+          case 'triangle':
+            shape = new Triangle(data.shape_color);
+            break;
+          default:
+            throw new Error('Invalid shape type');
+        }
+        const logoData = {
+            text: data.text,
+            text_color: data.text_color,
+            shape: shape
+        };
+        const logo = new LogoGen(logoData).render();
+        return writeFile('./examples/logo.svg', logo);
+    
+//     const newLogo = new LogoGen(
+//         data.text,
+//         data.text_color,
+//         data.shape,
+//         data.shape_color
+// );
+//     //use render() to create the logo
+//     const logo = newLogo.render();
+
 
 }).then(() => {
     //let the user know that their logo was created successfully
